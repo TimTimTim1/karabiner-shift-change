@@ -177,6 +177,38 @@ def add_one_key_pressed(modifier_key_1, modifier_key_2, key_pressed):
         }},"""
     return(json)
 
+def add_mouse_buttons(existing_json):
+    existing_json = existing_json + f"""
+        {{
+                "conditions": [
+                    {{
+                        "name": "modifier_1_active",
+                        "type": "variable_if",
+                        "value": 1
+                    }},
+                    {{
+                        "name": "modifier_2_active",
+                        "type": "variable_if",
+                        "value": 1
+                    }}
+                ],
+                "from": {{
+                    "pointing_button": "button1",
+                    "modifiers": {{
+                        "optional": ["any"]
+                    }}
+                }},
+                "to": [
+                    {{
+                        "pointing_button": "button1",
+                        "modifiers": ["left_shift"]
+                    }}
+                ],
+                "type": "basic"
+            }},"""
+    return existing_json
+
+
 def add_single_press_security(current_json, modifier_key_1, modifier_key_2, to_be_modified_keys):
     for i, key_pressed in enumerate(to_be_modified_keys):
         current_json = current_json + add_one_key_pressed(modifier_key_1, modifier_key_2, key_pressed)
@@ -191,7 +223,7 @@ controls_and_symbols = [
     "delete_or_backspace",
     "delete_forward",
     "tab",
-    # "spacebar",
+    "spacebar",
     "hyphen",
     "equal_sign",
     "open_bracket",
@@ -206,7 +238,17 @@ controls_and_symbols = [
     "slash",
     "non_us_backslash",
 ]
-to_be_modified_keys = capitals + numbers + controls_and_symbols
+arrows = ["up_arrow",
+          "down_arrow",
+          "left_arrow",
+          "right_arrow",
+          "page_up",
+          "page_down",
+          "home",
+          "end"]
+
+
+to_be_modified_keys = capitals + numbers + controls_and_symbols + arrows
 modifier_key_1, modifier_key_2 = "d", "f"
 
 
@@ -214,15 +256,13 @@ modifier_key_1, modifier_key_2 = "d", "f"
 modifiers_json = initiate_modifiers(modifier_key_1, modifier_key_2)
 
 
-
-
 #Next we add the modifiers to the keys on which we want the modifiers to act
 modifiers_and_keys_to_be_modified_json = add_all_to_be_modified_keys(modifiers_json, to_be_modified_keys)
 
 modifiers_and_keys_to_be_modified_and_single_press_security_json = add_single_press_security(modifiers_and_keys_to_be_modified_json, modifier_key_1, modifier_key_2, to_be_modified_keys)
+modifiers_and_keys_to_be_modified_and_single_press_security_json_and_mouse = add_mouse_buttons(modifiers_and_keys_to_be_modified_and_single_press_security_json)
 
-
-final_json = remove_komma_add_end(modifiers_and_keys_to_be_modified_and_single_press_security_json)
+final_json = remove_komma_add_end(modifiers_and_keys_to_be_modified_and_single_press_security_json_and_mouse)
 pyperclip.copy(final_json)
 print(final_json)
 print("final json was copie to the clipboard")
